@@ -5,23 +5,30 @@
     // normally if JS is off
     document.documentElement.classList.add("assemble");
 
-    // Wrap each character of an element in an animated span
+    // Wrap each character of an element in an animated span. Words sit in
+    // inline-block shells so lines can only wrap between words, never
+    // mid-word (e.g. "Y/uen" on narrow screens)
     function wrapLetters(el, startDelay, step) {
-        var text = el.textContent;
+        var tokens = el.textContent.split(/(\s+)/);
         el.textContent = "";
         var delay = startDelay;
-        Array.prototype.forEach.call(text, function (ch) {
-            if (ch === " ") {
+        tokens.forEach(function (tok) {
+            if (!tok.trim()) {
                 el.appendChild(document.createTextNode(" "));
                 return;
             }
-            var s = document.createElement("span");
-            s.className = "letter";
-            s.textContent = ch;
-            s.style.animationDelay = delay + "ms";
-            s.style.setProperty("--rot", (Math.random() * 24 - 12).toFixed(1) + "deg");
-            el.appendChild(s);
-            delay += step;
+            var shell = document.createElement("span");
+            shell.className = "word-shell";
+            Array.prototype.forEach.call(tok, function (ch) {
+                var s = document.createElement("span");
+                s.className = "letter";
+                s.textContent = ch;
+                s.style.animationDelay = delay + "ms";
+                s.style.setProperty("--rot", (Math.random() * 24 - 12).toFixed(1) + "deg");
+                shell.appendChild(s);
+                delay += step;
+            });
+            el.appendChild(shell);
         });
         return delay;
     }
